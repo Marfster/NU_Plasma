@@ -86,7 +86,7 @@ for sample in files_1:
 
     avg_ratio_sample_all[sample] = new_corr.avg_to_df(data_sample, sample)
     sd2_ratio_sample_all[sample] = new_corr.SD_to_df(data_sample, sample)
-    sample_names[sample] = df.sample_name(sample)
+    sample_names[sample] = df.extract_metadata(sample, "Sample Name")
 
 data_all_1 = new_corr.to_df_all(sample_names, avg_ratio_sample_all, sd2_ratio_sample_all, ratios = False)
 

@@ -26,15 +26,15 @@ class NU_data_read(object):
        ***********************************'''
 
     # Extracts sample name
-    def sample_name(self, filenumber):
+    def extract_metadata(self, filenumber, metadata_string):
         datafile = "Data_" + str(filenumber) + ".csv"
 
         df = pd.read_table(self.path + datafile, dtype=str, header=None)
         for row in range(len(df.index)):
             line = str(df[0][row])
-            if 'Sample Name' in line:
-                sample = re.search(r"Sample Name,(.*)", line).group(1)
-        return sample
+            if metadata_string in line:
+                metadata = re.search(r""+metadata_string+",(.*)", line).group(1)
+        return metadata
 
     # Reads in the data
     def data_read(self, filenumber):
@@ -246,7 +246,6 @@ class int_norm(object):
 
                         convergence = (beta_temp - beta_update) / beta_temp
                         beta_temp = beta_update
-                        print beta_temp, convergence
                     else:
                         print "Iterative Beta Correction Failed! --> beta_temp before iteration used"
                         beta_temp = log(true_ratio / (isotope_nom_guess/ signal_isotope_denom)) / log(mass_isotope_nom/mass_isotope_denom)
@@ -281,7 +280,6 @@ class int_norm(object):
 
                     convergence = (beta_temp - beta_update) / beta_temp
                     beta_temp = beta_update
-                    #print beta_temp, convergence
 
         return beta_temp
 
@@ -394,18 +392,22 @@ class evaluation(object):
         self.data_dict = df_bgd_corr
         return self.data_dict
     #raw signals
-    def raw_signals(self):
+    def raw_signals(self, isotope_denom):
         data_sample = {}
+        isotopes_0 = self.isotopes[0]
+        isotopes_0.append(isotope_denom)
+
         for n in self.cycles:
             corr = int_norm(self.data_dict, n, self.cups, self.database, self.mass_range, self.isotopes_for_corr, self.denom_corr_ratio)
             data_sample[n] = {}
 
-            for isotope in self.isotopes[0]:
+            for isotope in isotopes_0:
                 data_sample[n][isotope] = corr.lookup_signal(isotope, isotope_from_line1=True)
 
             if len(self.isotopes) > 1:
                 for isotope in self.isotopes[1]:
                     data_sample[n][isotope + "_2"] = corr.lookup_signal(isotope, isotope_from_line1=False)
+
         return data_sample
     #raw ratios
     def raw_ratios(self, isotope_denom):
@@ -551,11 +553,12 @@ class evaluation(object):
 
             avg_ratio_sample_all[sample] = new_corr.avg_to_df(data_sample, sample)
             sd2_ratio_sample_all[sample] = new_corr.SD_to_df(data_sample, sample)
-            sample_names[sample] = df.sample_name(sample)
+            sample_names[sample] = df.extract_metadata(sample, "Sample Name")
 
             data_all = new_corr.to_df_all(sample_names, avg_ratio_sample_all, sd2_ratio_sample_all, ratios = False)
 
         return data_all
+
 
     # standard-sample bracketing
 

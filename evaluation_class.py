@@ -63,7 +63,7 @@ sd2_ratio_sample_all_2 = {}
 #raw = new_corr.raw_ratios()
 #print raw
 
-files_1 = range(1518, 1729, 1)
+files_1 = range(1519, 1729, 1)
 #files_1.remove(1146)
 
 
@@ -78,10 +78,10 @@ for sample in files_1:
     #df_bgd_2 = blk_2.data_zero_corr(files[sample][1][1])
 
     new_corr = evaluation(df_zero, cycles, isotopes, cup_config, database, mass_range, corr_isotopes_Sb, denom_corr_ratio)
-    new_corr.line2_corr(df_zero, "119")
+    #new_corr.line2_corr(df_zero, "119")
     #new_corr.data_bgd_corr(df_bgd_1, df_bgd_2)
 
-    data_sample[sample] = new_corr.external_norm_Sb()
+    data_sample[sample] = new_corr.external_norm_Sb("120", 10)
     #data_sample[sample] = new_corr.mass_fractionation()
 
     avg_ratio_sample_all[sample] = new_corr.avg_to_df(data_sample, sample)

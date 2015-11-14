@@ -459,10 +459,8 @@ class evaluation(object):
         return data_sample
     # 2 no corr on isotope_denom,
     def internal_norm_1(self, isotope_denom, iter):
-        data_sample = {}
-        for n in self.cycles:
             corr = int_norm(self.data_dict, n, self.cups, self.database, self.mass_range, self.isotopes_for_corr, self.denom_corr_ratio)
-            beta = corr.beta(iter, "Sn", "116", "120", isotope_denom_corr = False)
+            beta = corr.beta(iter, "Sn", "122", "118", isotope_denom_corr = False)
 
             data_sample[n] = {}
             for isotope in self.isotopes[0]:
@@ -481,6 +479,8 @@ class evaluation(object):
             beta = corr.beta(iter, "Sn", "116", "120", isotope_denom_corr = True)
 
             data_sample[n] = {}
+        data_sample = {}
+        for n in self.cycles:
             for isotope in self.isotopes[0]:
                 data_sample[n][isotope] = corr.interference_corr_ratio("Sn", isotope , isotope_denom, beta, isotope_denom_corr = True, isotope_from_line1 = True)
 

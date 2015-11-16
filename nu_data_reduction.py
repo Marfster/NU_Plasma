@@ -506,6 +506,44 @@ class evaluation(object):
                     data_sample[n][isotope + "_2"] = corr.interference_corr_ratio("Sn", isotope , isotope_denom, beta, isotope_denom_corr = True, isotope_from_line1 = False)
 
         return data_sample
+
+    #outlier detection from https://github.com/joferkington/oost_paper_code/blob/master/utilities.py
+    def is_outlier(points, thresh=3.5):
+    """
+    Returns a boolean array with True if points are outliers and False
+    otherwise.
+
+    Parameters:
+    -----------
+        points : An numobservations by numdimensions array of observations
+        thresh : The modified z-score to use as a threshold. Observations with
+            a modified z-score (based on the median absolute deviation) greater
+            than this value will be classified as outliers.
+
+    Returns:
+    --------
+        mask : A numobservations-length boolean array.
+
+    References:
+    ----------
+        Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
+        Handle Outliers", The ASQC Basic References in Quality Control:
+        Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
+    """
+    if len(points.shape) == 1:
+        points = points[:,None]
+    median = np.median(points, axis=0)
+    diff = np.sum((points - median)**2, axis=-1)
+    diff = np.sqrt(diff)
+    med_abs_deviation = np.median(diff)
+
+    modified_z_score = 0.6745 * diff / med_abs_deviation
+
+    return modified_z_score > thresh
+
+    #outlier rejection
+
+
     #data processing wrap up
     def data_process(self, path, files, cup_config, isotopes, mass_range, corr_isotopes, denom_corr_ratio, line2_corr, isotope_line2_corr, bgd_corr, option, iter_beta, isotope_denom):
         # Empty dataframes
@@ -542,9 +580,6 @@ class evaluation(object):
                        4: new_corr.mass_fractionation, 5: new_corr.internal_norm_1, 6: new_corr.internal_norm_2,
                        7: new_corr.external_norm_Sb}
 
-            if option < 2:
-                data_sample[sample] = methods[option]()
-
             if option < 4:
                 data_sample[sample] = methods[option](isotope_denom)
 
@@ -563,6 +598,18 @@ class evaluation(object):
     # standard-sample bracketing
 
     # to_dataframe
+    def all_cycles_to_df(self, df, sample):
+        df_zero = pd.DataFrame(df_zero["cycle1"])
+        sample_name = df.extract_metadata(sample, "Sample Name")
+        date = df.extract_metadata(sample, "Date")
+        starttime = df.extract_metadata(sample, "Start Time")
+        df_zero["date"] = datetime.strptime(date+starttime, '%d/%m/%Y%H:%M')
+        df_zero["sample"] = sample_name
+        df_zero["cycle"] = df_zero.index.values
+        df_zero.index = df_zero["date"]
+        df_zero = df_zero[columns]
+        df_all = df_all.append(df_zero, ignore_index = True)
+
     def avg_to_df(self, data_sample, sample):
 
         df_ratio_sample = pd.DataFrame.from_dict(data_sample[sample], orient = 'index')

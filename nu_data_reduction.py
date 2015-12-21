@@ -391,6 +391,35 @@ class evaluation(object):
                     df_bgd_corr[cycle][cup] = cup_cycle
         self.data_dict = df_bgd_corr
         return self.data_dict
+
+    def data_bgd_corr_2(self, ):
+        # method for blank correction
+            # arbitrary blank positions
+            #blk1 = [item for item in blk_ls if item < sample]
+            #blk2 = [item for item in blk_ls if item > sample]
+            #blk1 = blk1[-1]
+            #blk2 = blk2[0]
+            #blk_corr_sample == True
+
+            # blank measurement surrounds sample
+            #if ((sample-1) in blk_ls) and ((sample+1) in blk_ls):
+            #    blk1 = sample-1
+            #    blk2 = sample+1
+            #    blk_corr_sample = True
+            #else:
+            #    blk_corr_sample = False
+            if (blk_corr == True) and (blk_corr_sample == True):
+                blk_1 = NU_data_read(path, blk1, cup_config)
+                blk_2 = NU_data_read(path, blk2, cup_config)
+                df_zero = df.data_zero_corr(sample)
+                df_bgd_1 = blk_1.data_zero_corr(blk1)
+                df_bgd_2 = blk_2.data_zero_corr(blk2)
+                new_corr = evaluation(df_zero, cycles, isotopes, cup_config, database, mass_range, corr_isotopes_Sb , denom_corr_ratio)
+                new_corr.data_bgd_corr(df_bgd_1, df_bgd_2)
+            else:
+                df_zero = df.data_zero_corr(sample)
+                new_corr = evaluation(df_zero, cycles, isotopes, cup_config, database, mass_range, corr_isotopes_Sb , denom_corr_ratio)
+
     #raw signals
     def raw_signals(self, isotope_denom):
         data_sample = {}
@@ -459,8 +488,10 @@ class evaluation(object):
         return data_sample
     # 2 no corr on isotope_denom,
     def internal_norm_1(self, isotope_denom, iter):
+        data_sample = {}
+        for n in self.cycles:
             corr = int_norm(self.data_dict, n, self.cups, self.database, self.mass_range, self.isotopes_for_corr, self.denom_corr_ratio)
-            beta = corr.beta(iter, "Sn", "122", "118", isotope_denom_corr = False)
+            beta = corr.beta(iter, "Sn", "116", "120", isotope_denom_corr = False)
 
             data_sample[n] = {}
             for isotope in self.isotopes[0]:
@@ -471,6 +502,7 @@ class evaluation(object):
                     data_sample[n][isotope + "_2"] = corr.interference_corr_ratio("Sn", isotope , isotope_denom, beta, isotope_denom_corr = False, isotope_from_line1 = False)
 
         return data_sample
+
     # 3 corr on isotope_denom
     def internal_norm_2(self, isotope_denom, iter):
         data_sample = {}
@@ -508,40 +540,51 @@ class evaluation(object):
         return data_sample
 
     #outlier detection from https://github.com/joferkington/oost_paper_code/blob/master/utilities.py
-    def is_outlier(points, thresh=3.5):
-    """
-    Returns a boolean array with True if points are outliers and False
-    otherwise.
+    def mad_based_outlier(self, points, thresh=3.5):
+        """
+        Returns a boolean array with True if points are outliers and False
+        otherwise.
 
-    Parameters:
-    -----------
-        points : An numobservations by numdimensions array of observations
-        thresh : The modified z-score to use as a threshold. Observations with
-            a modified z-score (based on the median absolute deviation) greater
-            than this value will be classified as outliers.
+        Parameters:
+        -----------
+            points : An numobservations by numdimensions array of observations
+            thresh : The modified z-score to use as a threshold. Observations with
+                a modified z-score (based on the median absolute deviation) greater
+                than this value will be classified as outliers.
 
-    Returns:
-    --------
-        mask : A numobservations-length boolean array.
+        Returns:
+        --------
+            mask : A numobservations-length boolean array.
 
-    References:
-    ----------
-        Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
-        Handle Outliers", The ASQC Basic References in Quality Control:
-        Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
-    """
-    if len(points.shape) == 1:
-        points = points[:,None]
-    median = np.median(points, axis=0)
-    diff = np.sum((points - median)**2, axis=-1)
-    diff = np.sqrt(diff)
-    med_abs_deviation = np.median(diff)
+        References:
+        ----------
+            Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
+            Handle Outliers", The ASQC Basic References in Quality Control:
+            Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
+        """
+        if len(points.shape) == 1:
+            points = points[:,None]
+        median = np.median(points, axis=0)
+        diff = np.sum((points - median)**2, axis=-1)
+        diff = np.sqrt(diff)
+        med_abs_deviation = np.median(diff)
 
-    modified_z_score = 0.6745 * diff / med_abs_deviation
+        modified_z_score = 0.6745 * diff / med_abs_deviation
 
-    return modified_z_score > thresh
+        return modified_z_score > thresh
 
     #outlier rejection
+    def mad_outlier_rejection(self, df):
+        data_sample_outlier = pd.DataFrame()
+        columns = df.columns.tolist()
+        for column in columns:
+            data_sample_outlier[column] = df[column].where(~self.mad_based_outlier(df[column]), other=np.NaN)
+        return data_sample_outlier
+
+    def z_score_outlier_rejection(self, df):
+        df = df[np.abs(df - df.mean())<=(2*df.std())]
+
+        return df
 
 
     #data processing wrap up

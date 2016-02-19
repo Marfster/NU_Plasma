@@ -487,11 +487,11 @@ class evaluation(object):
 
         return data_sample
     # 2 no corr on isotope_denom,
-    def internal_norm_1(self, isotope_denom, iter):
+    def internal_norm_1(self, norm_ratio, isotope_denom, iter):
         data_sample = {}
         for n in self.cycles:
             corr = int_norm(self.data_dict, n, self.cups, self.database, self.mass_range, self.isotopes_for_corr, self.denom_corr_ratio)
-            beta = corr.beta(iter, "Sn", "116", "120", isotope_denom_corr = False)
+            beta = corr.beta(iter, "Sn", norm_ratio[0], norm_ratio[1], isotope_denom_corr = False)
 
             data_sample[n] = {}
             for isotope in self.isotopes[0]:
@@ -504,11 +504,11 @@ class evaluation(object):
         return data_sample
 
     # 3 corr on isotope_denom
-    def internal_norm_2(self, isotope_denom, iter):
+    def internal_norm_2(self, norm_ratio, isotope_denom, iter):
         data_sample = {}
         for n in self.cycles:
             corr = int_norm(self.data_dict, n, self.cups, self.database, self.mass_range, self.isotopes_for_corr, self.denom_corr_ratio)
-            beta = corr.beta(iter, "Sn", "116", "120", isotope_denom_corr = True)
+            beta = corr.beta(iter, "Sn", norm_ratio[0], norm_ratio[1], isotope_denom_corr = True)
 
             data_sample[n] = {}
         data_sample = {}
@@ -523,11 +523,11 @@ class evaluation(object):
         return data_sample
 
     # External normalisation with Sb
-    def external_norm_Sb(self, isotope_denom, iter):
+    def external_norm_Sb(self, norm_ratio, isotope_denom, iter):
         data_sample = {}
         for n in self.cycles:
             corr = int_norm(self.data_dict, n, self.cups, self.database, self.mass_range, self.isotopes_for_corr, self.denom_corr_ratio)
-            beta = corr.beta(iter, "Sb", "123", "121", isotope_denom_corr = False)
+            beta = corr.beta(iter, "Sb", norm_ratio[0], norm_ratio[1], isotope_denom_corr = False)
 
             data_sample[n] = {}
             for isotope in self.isotopes[0]:

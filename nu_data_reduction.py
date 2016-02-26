@@ -511,8 +511,6 @@ class evaluation(object):
             beta = corr.beta(iter, "Sn", norm_ratio[0], norm_ratio[1], isotope_denom_corr = True)
 
             data_sample[n] = {}
-        data_sample = {}
-        for n in self.cycles:
             for isotope in self.isotopes[0]:
                 data_sample[n][isotope] = corr.interference_corr_ratio("Sn", isotope , isotope_denom, beta, isotope_denom_corr = True, isotope_from_line1 = True)
 

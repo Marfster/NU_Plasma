@@ -365,7 +365,7 @@ class evaluation(object):
         return self.data_dict
 
     #background correction
-    def data_bgd_corr(self, df_bgd_1, df_bgd_2=None):
+    def data_bgd_corr(self, df_bgd_1, df_bgd_2):
         if df_bgd_2:
             bgd_signals = {}
             for cycle in df_bgd_1:
@@ -375,7 +375,7 @@ class evaluation(object):
                         bgd_signals[cycle][cup] = {}
                         for meas_point in df_bgd_1[cycle][cup]:
                             if (meas_point in df_bgd_2[cycle][cup]):
-                                avg_cup_cycle_bgd = (df_bgd_1[cycle][cup][meas_point] + df_bgd_2[cycle][cup][meas_point])/2
+                                avg_cup_cycle_bgd = np.divide((np.add(df_bgd_1[cycle][cup][meas_point], df_bgd_2[cycle][cup][meas_point])),2)
                                 bgd_signals[cycle][cup][meas_point] = avg_cup_cycle_bgd
         else:
             bgd_signals = df_bgd_1
@@ -385,10 +385,25 @@ class evaluation(object):
             df_bgd_corr[cycle] = {}
             for cup in self.data_dict[cycle]:
                 if (cup in bgd_signals[cycle]):
-                    cup_cycle = Counter(self.data_dict[cycle][cup])
-                    cup_cycle_bgd = Counter(bgd_signals[cycle][cup])
-                    cup_cycle.subtract(cup_cycle_bgd)
-                    df_bgd_corr[cycle][cup] = cup_cycle
+                    if len(self.data_dict[cycle][cup]) == len(bgd_signals[cycle][cup]):
+                        cup_cycle = Counter(self.data_dict[cycle][cup])
+                        cup_cycle_bgd = Counter(bgd_signals[cycle][cup])
+                        cup_cycle.subtract(cup_cycle_bgd)
+                        df_bgd_corr[cycle][cup] = cup_cycle
+
+                    if len(self.data_dict[cycle][cup]) != len(bgd_signals[cycle][cup]):
+                        names = ['id','data']
+                        formats = ['float','float']
+                        dtype = dict(names = names, formats=formats)
+                        cup_cycle = np.array(self.data_dict[cycle][cup].items(), dtype=dtype)
+                        cup_cycle_bgd = np.array(bgd_signals[cycle][cup].items(), dtype=dtype)
+                        mean = np.mean(cup_cycle_bgd["data"])
+                        x2 = np.full(40,(mean))
+                        cup_cycle_pre = np.array(cup_cycle)
+                        cup_cycle["data"] = cup_cycle["data"] - x2
+                        df_bgd_corr[cycle][cup] = Counter(dict(enumerate(cup_cycle["data"], 1)))
+                    else:
+                        print("Error bgd corretion")
         self.data_dict = df_bgd_corr
         return self.data_dict
 
@@ -500,8 +515,8 @@ class evaluation(object):
             if len(self.isotopes) > 1:
                 for isotope in self.isotopes[1]:
                     data_sample[n][isotope + "_2"] = corr.interference_corr_ratio("Sn", isotope , isotope_denom, beta, isotope_denom_corr = False, isotope_from_line1 = False)
-
         return data_sample
+
 
     # 3 corr on isotope_denom
     def internal_norm_2(self, norm_ratio, isotope_denom, iter):

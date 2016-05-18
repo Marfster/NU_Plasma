@@ -385,25 +385,16 @@ class evaluation(object):
             df_bgd_corr[cycle] = {}
             for cup in self.data_dict[cycle]:
                 if (cup in bgd_signals[cycle]):
-                    if len(self.data_dict[cycle][cup]) == len(bgd_signals[cycle][cup]):
-                        cup_cycle = Counter(self.data_dict[cycle][cup])
-                        cup_cycle_bgd = Counter(bgd_signals[cycle][cup])
-                        cup_cycle.subtract(cup_cycle_bgd)
-                        df_bgd_corr[cycle][cup] = cup_cycle
-
-                    if len(self.data_dict[cycle][cup]) != len(bgd_signals[cycle][cup]):
                         names = ['id','data']
                         formats = ['float','float']
                         dtype = dict(names = names, formats=formats)
                         cup_cycle = np.array(self.data_dict[cycle][cup].items(), dtype=dtype)
                         cup_cycle_bgd = np.array(bgd_signals[cycle][cup].items(), dtype=dtype)
                         mean = np.mean(cup_cycle_bgd["data"])
-                        x2 = np.full(40,(mean))
+                        x2 = np.full(len(self.data_dict[cycle][cup]),(mean))
                         cup_cycle_pre = np.array(cup_cycle)
                         cup_cycle["data"] = cup_cycle["data"] - x2
                         df_bgd_corr[cycle][cup] = Counter(dict(enumerate(cup_cycle["data"], 1)))
-                    else:
-                        print("Error bgd corretion")
         self.data_dict = df_bgd_corr
         return self.data_dict
 

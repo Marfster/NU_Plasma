@@ -390,9 +390,9 @@ class evaluation(object):
                         dtype = dict(names = names, formats=formats)
                         cup_cycle = np.array(self.data_dict[cycle][cup].items(), dtype=dtype)
                         cup_cycle_bgd = np.array(bgd_signals[cycle][cup].items(), dtype=dtype)
-                        mean = np.mean(cup_cycle_bgd["data"])
+                        mean = np.nanmean(cup_cycle_bgd["data"])
                         x2 = np.full(len(self.data_dict[cycle][cup]),(mean))
-                        cup_cycle_pre = np.array(cup_cycle)
+                        cup_cycle = np.array(cup_cycle)
                         cup_cycle["data"] = cup_cycle["data"] - x2
                         df_bgd_corr[cycle][cup] = Counter(dict(enumerate(cup_cycle["data"], 1)))
         self.data_dict = df_bgd_corr
@@ -583,6 +583,16 @@ class evaluation(object):
         columns = df.columns.tolist()
         for column in columns:
             data_sample_outlier[column] = df[column].where(~self.mad_based_outlier(df[column]), other=np.NaN)
+        return data_sample_outlier
+
+    def mad_outlier_rejection_dict(self, dictionary):
+        data_sample_outlier = {}
+        for cycle in dictionary:
+            temp = pd.DataFrame.from_dict(dictionary[cycle], orient = 'columns')
+            temp = self.mad_outlier_rejection(temp)
+            data_sample_outlier[cycle] = temp.to_dict()
+        for cup in data_sample_outlier[cycle]:
+            data_sample_outlier[cycle][cup] = Counter(data_sample_outlier[cycle][cup])
         return data_sample_outlier
 
     def z_score_outlier_rejection(self, df):

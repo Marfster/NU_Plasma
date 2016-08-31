@@ -7,7 +7,7 @@ import pandas as pd
 '''Classes for Reading in the Data and applying Internal Normalisation'''
 from nu_data_reduction import NU_data_read, int_norm, evaluation
 
-path = "/Volumes/friebelm/PhD/NU Plasma/Measurements/2015-05-03/"
+path = "/Volumes/friebelm/PhD/NU Plasma/Measurements/2016-04-22/"
 
 # First and Last Datafile Number of the measurement
 #files = range(50, 57)

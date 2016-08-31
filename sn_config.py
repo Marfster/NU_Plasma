@@ -69,13 +69,19 @@ Te_ratios = Isotope_Ratios()
 Te_ratios.add_ratios_dict("128", {"120" : 0.002919, "122" : 0.079603, "123" : 0.027904, "124" : 0.14853,
                                   "125" : 0.222041, "126" : 0.592264, "130" : 1.075950})
 
-#*** Xe after Basford (1973)***#
+#*** Xe after Basford (1973)***# - normally used
 Xe_ratios = Isotope_Ratios()
 Xe_ratios.add_ratios_dict("130", {"124" : 0.02337, "126" : 0.02179, "128" : 0.47150, "129" : 6.49631,
                                   "131" : 5.21376, "132" : 6.60688, "134" : 2.56265, "136" : 2.17617})
 
+#*** Xe after IUPAC (2001)***#
+#Xe_ratios = Isotope_Ratios()
+#Xe_ratios.add_ratios_dict("130", {"124" : 0.02339, "126" : 0.02187, "128" : 0.46924, "129" : 6.48504,
+#                                  "131" : 5.21552, "132" : 6.60981, "134" : 2.54414, "136" : 2.17571})
+
 Sn_ratios.transf_ratio("120", "119")
 Sn_ratios.transf_ratio("120", "118")
+Sn_ratios.transf_ratio("120", "117")
 Te_ratios.transf_ratio("128", "126")
 Te_ratios.transf_ratio("128", "125")
 Xe_ratios.transf_ratio("130", "129")

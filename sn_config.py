@@ -119,6 +119,10 @@ cycle_Sb_2_mass_range.add_mass_range_dict({"116" : ["Sn", "Cd"], "117" : ["Sn"],
                                          "123" : ["Sb", "Te"], "124" : ["Sn", "Te", "Xe"], "125" : ["Te"],
                                           "127" : ["I"], "129" : ["Xe"]})
 
+cycle_Sn_nep_mass_range = Isotopes_Mass_Range()
+cycle_Sn_nep_mass_range.add_mass_range_dict({"117" : ["Sn"], "118" : ["Sn"], "119" : ["Sn"],
+                                         "120" : ["Sn", "Te"], "121" : ["Sb"], "122" : ["Sn", "Te"],
+                                         "123" : ["Sb", "Te"], "124" : ["Sn", "Te", "Xe"]})
 
 # Isotopes used for Interference correction
 #cycles1_corr = {}
@@ -161,3 +165,6 @@ cycle_Sb_2 = {"cycle1" : {"H8 (1)" : "129", "H7 (1)" : "127", "H6 (1)" : "125", 
              "zero1" : {"H8 (Z1)" : "129", "H7 (Z1)" : "127", "H6 (Z1)" : "125", "H5 (Z1)" : "124",
                        "H4 (Z1)" : "123", "H3 (Z1)" : "122", "H2 (Z1)" : "121", "H1 (Z1)" : "120", "Ax (Z1)" : "119",
                        "L1 (Z1)" : "118", "L2 (Z1)" : "117", "L3 (Z1)" : "116"}}
+
+cycles_1_Neptune = {"cycle1" : {"124Sn" : "124", "123Sb" : "123", "122Sn" : "122", "121Sb" : "121",
+                       "120Sn" : "120", "119Sn" : "119", "118Sn" : "118", "117Sn" : "117"}}

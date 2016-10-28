@@ -102,6 +102,69 @@ class NU_data_read(object):
                     bgd_signals[cycle][cup] = cup_cycle
         return bgd_signals
 
+class Neptune_data_read(object):
+
+    def __init__(self,path, datafile_list, cup_configuration):
+
+        '''******************************************************************************
+        Values for Reading in the data and storing it accordingly to the cup settings
+        ****************************************************************************** '''
+        self.path = path  # Path of Datafiles
+        self.files = datafile_list  # List of datafile numbers
+        #self.cycles = no_cycles # isotope measurement lines
+        self.cups = cup_configuration # "dictionary with cup configuration
+        '''***********************************
+        Functions used for Reading the data
+        ***********************************'''
+
+    # Extracts sample name
+    def extract_metadata(self, filex, metadata_string):
+
+        df = pd.read_table(filex, dtype=str, header=None)
+        for row in range(len(df.index)):
+            line = str(df[0][row])
+            if metadata_string in line:
+                metadata = re.search(r"" + metadata_string + ":(.*)", line).group(1)
+        return metadata
+
+    # Reads in the data
+    def data_read(self, filex):
+        data = pd.read_table(filex, skiprows=16, index_col = "Cycle")
+        data = data.ix[:,:"124Sn"]
+        data = data.drop(["***"],axis=0)
+        data.ix[:,"117Sn":] = data.ix[:,"117Sn":].astype(np.float64)
+        data = data.dropna(axis=0)
+        data.index = data.index.astype(np.int64)
+        return data
+
+    # Return the measured signals in the cycle of each sample
+    def data_signals(self, filex):
+        data = self.data_read(filex)
+        columns = data.columns.values.tolist()
+        dict_signals = {}
+        for cycle in self.cups:
+            dict_signals[cycle] = {}
+            for cup in self.cups[cycle]:
+                if (cup in columns):
+                    dict_signals[cycle][cup] = data[cup].to_dict()
+        return dict_signals
+
+
+    # Background correction for one sample with one background
+    def data_bgd_corr(self, filenumber, filenumber_bgd):
+        zero_data = self.data_zero_corr(filenumber)
+        zero_data_bgd = self.data_zero_corr(filenumber_bgd)
+        bgd_signals = {}
+        for cycle in zero_data:
+            bgd_signals[cycle] = {}
+            for cup in zero_data[cycle]:
+                if (cup in zero_data_bgd[cycle]):
+                    cup_cycle = Counter(zero_data[cycle][cup])
+                    cup_cycle_bgd = Counter(zero_data_bgd[cycle][cup])
+                    cup_cycle.subtract(cup_cycle_bgd)
+                    bgd_signals[cycle][cup] = cup_cycle
+        return bgd_signals
+
 class int_norm(object):
 
     def __init__(self, data_dict, cycle_no, cup_configuration, database, mass_range, isotopes_for_corr, denom_corr_ratio=None):

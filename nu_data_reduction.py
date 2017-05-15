@@ -20,12 +20,12 @@ class NU_data_read(object):
         self.files = datafile_list  # List of datafile numbers
         #self.cycles = no_cycles # isotope measurement lines
         self.cups = cup_configuration # "dictionary with cup configuration
-        self.zero_cycles = [k for k in cup_configuration.keys() if 'zero' in k]
+        self.zero_cycles = [k for k in cup_configuration.keys() if 'zero' in k] # cycles for one measurements
     '''***********************************
        Functions used for Reading the data
        ***********************************'''
 
-    # Extracts sample name
+    # Extracts sample name, date, ... of csv file
     def extract_metadata(self, filenumber, metadata_string):
         datafile = "Data_" + str(filenumber) + ".csv"
 
@@ -41,7 +41,7 @@ class NU_data_read(object):
         datafile = "Data_" + str(filenumber) + ".csv"
 
 
-        data = pd.read_csv(self.path + datafile, skiprows=58, index_col='Cycle')
+        data = pd.read_csv(self.path + datafile, skiprows=58, index_col='Cycle') # before line 58 only headers
         return data
 
     # Return the measured signals in the cycle of each sample
@@ -49,7 +49,7 @@ class NU_data_read(object):
         data = self.data_read(filenumber)
         columns = data.columns.values.tolist()
         dict_signals = {}
-        for cycle in self.cups:
+        for cycle in self.cups: # reads through cup configuration and writes signals per cup into a dictionary
             dict_signals[cycle] = {}
             for cup in self.cups[cycle]:
                 if (cup in columns):
@@ -169,16 +169,16 @@ class int_norm(object):
 
     def __init__(self, data_dict, cycle_no, cup_configuration, database, mass_range, isotopes_for_corr, denom_corr_ratio=None):
 
-        self.data_dict = data_dict
-        self.cycle_no = cycle_no
-        self.cups = cup_configuration
-        self.zero_cycles = [k for k in self.cups.keys() if 'zero' in k]
-        self.database = database
-        self.mass_range = mass_range
-        self.isotopes_for_corr = isotopes_for_corr
-        self.graph_of_corr = self.mass_range.get_graph_of_corr(self.isotopes_for_corr)
-        self.order_of_corr = self.mass_range.get_order_of_corr(self.isotopes_for_corr)
-        self.denom_corr_ratio = denom_corr_ratio
+        self.data_dict = data_dict                                                      #dictionary with data (usually zero and/or bgd corrected)
+        self.cycle_no = cycle_no                                                        # number of cycles per measurement
+        self.cups = cup_configuration                                                   # cup configuration used for measurement (see "sn_config.py")
+        self.zero_cycles = [k for k in self.cups.keys() if 'zero' in k]                 # number of cycles per zero measurement
+        self.database = database                                                        # refers to database in "sn_config.py", which contains the used Isotope masses and ratios
+        self.mass_range = mass_range                                                    # refers to defined mass range of isotopes for calculation (see "sn_config.py")
+        self.isotopes_for_corr = isotopes_for_corr                                      # defines Isotopes used for Interferences correction (see "sn_config.py or ipython notebook")
+        self.graph_of_corr = self.mass_range.get_graph_of_corr(self.isotopes_for_corr)  # creates a graph of dependencies for topologic sorting
+        self.order_of_corr = self.mass_range.get_order_of_corr(self.isotopes_for_corr)  # creates a order for topologic sorting
+        self.denom_corr_ratio = denom_corr_ratio                                        # alternative (interference-free) Isotope used for Interference correction on denominator isotope
     '''***********************************
        Functions used for internal normalisation
        ***********************************'''
@@ -238,11 +238,26 @@ class int_norm(object):
                     element_nom = list(element_nom)[0]
                     element_corr = set(self.mass_range.get_isotopes(corr_isotope))
                     element_corr = element_corr.intersection(self.mass_range.get_isotopes(isotope))
-                    element_corr = list(element_corr)[0]
+                    element_corr = list(element_corr)
 
-                    true_ratio_corr = self.database[element_corr]["Ratios"].get_ratio(isotope, corr_isotope)
-                    corr_dict[isotope] = self.int_norm(element_nom, element_denom, isotope, isotope_denom, beta, isotope_from_line1 = isotope_from_line1, corr_isotope_denom = corr_isotope_denom)
-                    corr_dict[isotope] -= corr_dict[corr_isotope] * true_ratio_corr
+                    if (len(element_corr) > 1):
+                        corr_dict[isotope] = self.int_norm(element_nom, element_denom, isotope, isotope_denom, beta,
+                                                           isotope_from_line1=isotope_from_line1,
+                                                           corr_isotope_denom=corr_isotope_denom)
+                        for element in element_corr:
+                            if element in self.isotopes_for_corr:
+                                corr_isotope_x = self.isotopes_for_corr[element]
+                                true_ratio_corr = self.database[element]["Ratios"].get_ratio(isotope, corr_isotope_x)
+                                corr_dict[isotope] -= corr_dict[corr_isotope_x] * true_ratio_corr
+                            else:
+                                None
+
+                    else:
+                        true_ratio_corr = self.database[element_corr[0]]["Ratios"].get_ratio(isotope, corr_isotope)
+                        corr_dict[isotope] = self.int_norm(element_nom, element_denom, isotope, isotope_denom, beta,
+                                                           isotope_from_line1=isotope_from_line1,
+                                                           corr_isotope_denom=corr_isotope_denom)
+                        corr_dict[isotope] -= corr_dict[corr_isotope] * true_ratio_corr
                 counter += 1
 
         return corr_dict
@@ -635,7 +650,7 @@ class evaluation(object):
         diff = np.sum((points - median)**2, axis=-1)
         diff = np.sqrt(diff)
         med_abs_deviation = np.median(diff)
-
+     
         modified_z_score = 0.6745 * diff / med_abs_deviation
 
         return modified_z_score > thresh

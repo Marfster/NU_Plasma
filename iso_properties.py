@@ -128,11 +128,17 @@ class Isotopes_Mass_Range():
             graph[mass_no] = set()
             for isotope in isotopes:
                 if isotope in corr_isotopes and set(isotopes).issubset(corr_isotopes) == False:
-                    graph[mass_no].add(corr_isotopes[isotope])
+                    if isotope == self.isotopes_mass_range[mass_no][0]:
+                        None
+                    else:
+                        graph[mass_no].add(corr_isotopes[isotope])
                 elif isotope not in corr_isotopes:
                     None
                 elif len(self.isotopes_mass_range[corr_isotopes[isotope]]) == 1 and len(self.isotopes_mass_range[mass_no]) > 1:
-                    graph[mass_no].add(corr_isotopes[isotope])
+                    if isotope == self.isotopes_mass_range[mass_no][0]:
+                        None
+                    else:
+                        graph[mass_no].add(corr_isotopes[isotope])
         return graph
     # Order the dependencies - directed topology
     def get_order_of_corr(self, corr_isotopes):

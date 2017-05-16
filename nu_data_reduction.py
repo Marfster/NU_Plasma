@@ -226,39 +226,35 @@ class int_norm(object):
             elif counter > 0:
                 for isotope in level:
                     corr_isotopes = list(self.graph_of_corr[isotope])
-                    if (len(corr_isotopes) > 1):
-                        for mass_no in corr_isotopes:
-                            if mass_no in self.order_of_corr[counter-1]:
-                                corr_isotope = mass_no
-                    else:
-                        corr_isotope = corr_isotopes[0]
 
-                    element_nom = set(self.mass_range.get_isotopes(isotope))
-                    element_nom = element_nom.difference(self.mass_range.get_isotopes(corr_isotope))
-                    element_nom = list(element_nom)[0]
-                    element_corr = set(self.mass_range.get_isotopes(corr_isotope))
-                    element_corr = element_corr.intersection(self.mass_range.get_isotopes(isotope))
-                    element_corr = list(element_corr)
+                    for corr_isotope in corr_isotopes:
+                        element_nom = set(self.mass_range.get_isotopes(isotope))
+                        element_nom = element_nom.difference(self.mass_range.get_isotopes(corr_isotope))
+                        element_nom = list(element_nom)[0]
+                        element_corr = set(self.mass_range.get_isotopes(corr_isotope))
+                        element_corr = element_corr.intersection(self.mass_range.get_isotopes(isotope))
+                        element_corr = list(element_corr)
 
-                    if (len(element_corr) > 1):
-                        corr_dict[isotope] = self.int_norm(element_nom, element_denom, isotope, isotope_denom, beta,
+                        if isotope in corr_dict:
+                            None
+                        else:
+                            corr_dict[isotope] = self.int_norm(element_nom, element_denom, isotope, isotope_denom, beta,
                                                            isotope_from_line1=isotope_from_line1,
                                                            corr_isotope_denom=corr_isotope_denom)
-                        for element in element_corr:
-                            if element in self.isotopes_for_corr:
-                                corr_isotope_x = self.isotopes_for_corr[element]
-                                true_ratio_corr = self.database[element]["Ratios"].get_ratio(isotope, corr_isotope_x)
-                                corr_dict[isotope] -= corr_dict[corr_isotope_x] * true_ratio_corr
-                            else:
-                                None
 
-                    else:
-                        true_ratio_corr = self.database[element_corr[0]]["Ratios"].get_ratio(isotope, corr_isotope)
-                        corr_dict[isotope] = self.int_norm(element_nom, element_denom, isotope, isotope_denom, beta,
-                                                           isotope_from_line1=isotope_from_line1,
-                                                           corr_isotope_denom=corr_isotope_denom)
-                        corr_dict[isotope] -= corr_dict[corr_isotope] * true_ratio_corr
-                counter += 1
+                        if (len(element_corr) > 1):
+
+                            for element in element_corr:
+                                if element in self.isotopes_for_corr:
+                                    corr_isotope_x = self.isotopes_for_corr[element]
+                                    true_ratio_corr = self.database[element]["Ratios"].get_ratio(isotope, corr_isotope_x)
+                                    corr_dict[isotope] -= corr_dict[corr_isotope_x] * true_ratio_corr
+                                else:
+                                    None
+
+                        else:
+                            true_ratio_corr = self.database[element_corr[0]]["Ratios"].get_ratio(isotope, corr_isotope)
+                            corr_dict[isotope] -= corr_dict[corr_isotope] * true_ratio_corr
 
         return corr_dict
 

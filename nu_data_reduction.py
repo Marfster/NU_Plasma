@@ -256,6 +256,8 @@ class int_norm(object):
                             true_ratio_corr = self.database[element_corr[0]]["Ratios"].get_ratio(isotope, corr_isotope)
                             corr_dict[isotope] -= corr_dict[corr_isotope] * true_ratio_corr
 
+                counter += 1
+
         return corr_dict
 
     # Interference correction

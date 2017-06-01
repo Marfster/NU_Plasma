@@ -221,15 +221,26 @@ class int_norm(object):
             if counter == 0:
                 for isotope in level:
                     element_nom = self.mass_range.get_isotopes(isotope)[0]
-                    corr_dict[isotope] = self.int_norm(element_nom, element_denom, isotope, isotope_denom, beta, isotope_from_line1 = isotope_from_line1, corr_isotope_denom = corr_isotope_denom)
+                    corr_dict[isotope] = self.int_norm(element_nom, element_denom, isotope, isotope_denom, beta,
+                                                       isotope_from_line1=isotope_from_line1,
+                                                       corr_isotope_denom=corr_isotope_denom)
+                    #print isotope
+                    #print element_nom
+                    #print element_denom
+                    #print isotope_denom
+                    #print corr_dict[isotope]
                 counter += 1
             elif counter > 0:
                 for isotope in level:
                     corr_isotopes = list(self.graph_of_corr[isotope])
 
+                    #print isotope
+
                     for corr_isotope in corr_isotopes:
-                        element_nom = set(self.mass_range.get_isotopes(isotope))
-                        element_nom = element_nom.difference(self.mass_range.get_isotopes(corr_isotope))
+                        #print self.mass_range.get_isotopes(isotope)
+                        element_nom = self.mass_range.get_isotopes(isotope)
+                        # corr_isotope_set = set(corr_isotopes)
+                        # element_nom = element_nom.difference(self.mass_range.get_isotopes(corr_isotope))
                         element_nom = list(element_nom)[0]
                         element_corr = set(self.mass_range.get_isotopes(corr_isotope))
                         element_corr = element_corr.intersection(self.mass_range.get_isotopes(isotope))
@@ -239,22 +250,18 @@ class int_norm(object):
                             None
                         else:
                             corr_dict[isotope] = self.int_norm(element_nom, element_denom, isotope, isotope_denom, beta,
-                                                           isotope_from_line1=isotope_from_line1,
-                                                           corr_isotope_denom=corr_isotope_denom)
+                                                               isotope_from_line1=isotope_from_line1,
+                                                               corr_isotope_denom=corr_isotope_denom)
 
-                        if (len(element_corr) > 1):
+                        true_ratio_corr = self.database[element_corr[0]]["Ratios"].get_ratio(isotope, corr_isotope)
+                        corr_dict[isotope] -= corr_dict[corr_isotope] * true_ratio_corr
 
-                            for element in element_corr:
-                                if element in self.isotopes_for_corr:
-                                    corr_isotope_x = self.isotopes_for_corr[element]
-                                    true_ratio_corr = self.database[element]["Ratios"].get_ratio(isotope, corr_isotope_x)
-                                    corr_dict[isotope] -= corr_dict[corr_isotope_x] * true_ratio_corr
-                                else:
-                                    None
-
-                        else:
-                            true_ratio_corr = self.database[element_corr[0]]["Ratios"].get_ratio(isotope, corr_isotope)
-                            corr_dict[isotope] -= corr_dict[corr_isotope] * true_ratio_corr
+                        #print isotope
+                        #print corr_isotope
+                        #print element_corr
+                        #print corr_dict[corr_isotope]
+                        #print corr_dict[corr_isotope] * true_ratio_corr
+                        #print corr_dict[isotope]
 
                 counter += 1
 
@@ -618,6 +625,14 @@ class evaluation(object):
                     data_sample[n][isotope + "_2"] = corr.interference_corr_ratio("Sn", isotope , isotope_denom, beta, isotope_denom_corr = True, isotope_from_line1 = False)
 
         return data_sample
+
+    def beta(self, element, norm_ratio, iter):
+        beta = {}
+        for n in self.cycles:
+            corr = int_norm(self.data_dict, n, self.cups, self.database, self.mass_range, self.isotopes_for_corr, self.denom_corr_ratio)
+            beta[n] = corr.beta(iter, element, norm_ratio[0], norm_ratio[1], isotope_denom_corr=False)
+
+        return beta
 
     #outlier detection from https://github.com/joferkington/oost_paper_code/blob/master/utilities.py
     def mad_based_outlier(self, points, thresh=3.5):

@@ -444,7 +444,7 @@ class evaluation(object):
                                 if (df["cycle1"][invers_dict["cycle1"][isotope]][meas_point]) and  df["cycle2"][invers_dict["cycle2"][isotope]][meas_point]:
                                     line2_corr = df["cycle1"][invers_dict["cycle1"][isotope]][meas_point]/df["cycle2"][invers_dict["cycle2"][isotope]][meas_point]
                                     df[cycle][cup][meas_point] = df[cycle][cup][meas_point] * line2_corr
-                    self.data_dict = df
+            self.data_dict = df
         return self.data_dict
 
     #background correction

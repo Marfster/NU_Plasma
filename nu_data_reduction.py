@@ -458,7 +458,9 @@ class evaluation(object):
                         bgd_signals[cycle][cup] = {}
                         for meas_point in df_bgd_1[cycle][cup]:
                             if (meas_point in df_bgd_2[cycle][cup]):
-                                avg_cup_cycle_bgd = np.divide((np.add(df_bgd_1[cycle][cup][meas_point], df_bgd_2[cycle][cup][meas_point])),2)
+                                avg_cup_cycle_bgd = np.nanmean([df_bgd_1[cycle][cup][meas_point],
+                                                               df_bgd_2[cycle][cup][meas_point]])
+                                #avg_cup_cycle_bgd = np.divide((np.add(df_bgd_1[cycle][cup][meas_point], df_bgd_2[cycle][cup][meas_point])),2)
                                 bgd_signals[cycle][cup][meas_point] = avg_cup_cycle_bgd
         else:
             bgd_signals = df_bgd_1

@@ -82,6 +82,7 @@ Xe_ratios.add_ratios_dict("130", {"124" : 0.02337, "126" : 0.02179, "128" : 0.47
 Sn_ratios.transf_ratio("120", "119")
 Sn_ratios.transf_ratio("120", "118")
 Sn_ratios.transf_ratio("120", "117")
+Sn_ratios.transf_ratio("120", "124")
 Te_ratios.transf_ratio("128", "126")
 Te_ratios.transf_ratio("128", "125")
 Xe_ratios.transf_ratio("130", "129")

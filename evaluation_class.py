@@ -63,13 +63,13 @@ sd2_ratio_sample_all_2 = {}
 #raw = new_corr.raw_ratios()
 #print raw
 
-files_1 = range(1519, 1729, 1)
+files_1 = list(range(1519, 1729, 1))
 #files_1.remove(1146)
 
 
 for sample in files_1:
     df = NU_data_read(path, sample, cup_config)
-    cycles = range(1, len(df.data_read(sample).index)+1)
+    cycles = list(range(1, len(df.data_read(sample).index)+1))
     #blk_1 = NU_data_read(path, files[sample][1][0], cup_config)
     #blk_2 = NU_data_read(path, files[sample][1][1], cup_config)
 

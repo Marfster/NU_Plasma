@@ -1,7 +1,5 @@
 __author__ = 'matthias'
 
-from toposort import toposort, toposort_flatten
-
 class Isotope_Masses():
 
     def __init__(self):
@@ -140,6 +138,37 @@ class Isotopes_Mass_Range():
                     else:
                         graph[mass_no].add(corr_isotopes[isotope])
         return graph
+    
+    def toposort(data):
+        """Dependencies are expressed as a dictionary whose keys are items
+    and whose values are a set of dependent items. Output is a list of
+    sets in topological order. The first set consists of items with no
+    dependences, each subsequent set consists of items that depend upon
+    items in the preceeding sets.
+
+    from: https://code.activestate.com/recipes/578272-topological-sort/
+
+    """
+
+        from functools import reduce
+
+        # Ignore self dependencies.
+        for k, v in data.items():
+            v.discard(k)
+        # Find all items that don't depend on anything.
+        extra_items_in_deps = reduce(set.union, data.itervalues()) - set(data.iterkeys())
+        # Add empty dependences where needed
+        data.update({item:set() for item in extra_items_in_deps})
+        while True:
+            ordered = set(item for item, dep in data.iteritems() if not dep)
+            if not ordered:
+                break
+            yield ordered
+            data = {item: (dep - ordered)
+                    for item, dep in data.iteritems()
+                        if item not in ordered}
+        assert not data, "Cyclic dependencies exist among these items:\n%s" % '\n'.join(repr(x) for x in data.iteritems())
+
     # Order the dependencies - directed topology
     def get_order_of_corr(self, corr_isotopes):
-        return list(toposort(self.get_graph_of_corr(corr_isotopes)))
+        return list(self.toposort(self.get_graph_of_corr(corr_isotopes)))

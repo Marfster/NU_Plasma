@@ -147,3 +147,5 @@ config.py
 #IPython checkpoints
 .ipynb_checkpoints
  
+#Python backup files
+*.py.bak

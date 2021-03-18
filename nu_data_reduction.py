@@ -300,11 +300,11 @@ class normalisation(object):
                     element_nom = self.mass_range.get_isotopes(isotope)[0]
                     corr_dict[isotope] = self.mass_frac_law(element_nom, element_denom, isotope, isotope_denom, beta,
                                                             isotope_from_line1, corr_isotope_denom)
-                    # print isotope
-                    # print element_nom
-                    # print element_denom
-                    # print isotope_denom
-                    # print corr_dict[isotope]
+                    #print isotope
+                    #print element_nom
+                    #print element_denom
+                    #print isotope_denom
+                    #print corr_dict[isotope]
                 counter += 1
             elif counter > 0:
                 for isotope in level:  # isotope masses with one or more interferences - search for interference element on isotope mass and the corresponding isotope mass used interference correction
@@ -332,12 +332,12 @@ class normalisation(object):
                                                                                              corr_isotope)  # get true ratio (corr_isotope/isotope_nominator - e.g 125Te/124Sn) from database used for correction
                         corr_dict[isotope] -= corr_dict[corr_isotope] * true_ratio_corr
 
-                        # print isotope
-                        # print corr_isotope
-                        # print element_corr
-                        # print corr_dict[corr_isotope]
-                        # print corr_dict[corr_isotope] * true_ratio_corr
-                        # print corr_dict[isotope]
+                        #print isotope
+                        #print corr_isotope
+                        #print element_corr
+                        #print corr_dict[corr_isotope]
+                        #print corr_dict[corr_isotope] * true_ratio_corr
+                        #print corr_dict[isotope]
 
                 counter += 1
 
@@ -421,18 +421,14 @@ class normalisation(object):
                     element_corr = element_corr.intersection(self.mass_range.get_isotopes(
                         isotope_nom))  # Select corr element based on intersection of corr_element and elements for isotope_nom (e.g. "111" - "Cd", "116" - "Sn,Cd" --> "Cd")
                     element_corr = list(element_corr)[0]  # element_corr = "Te" or "Xe" ...
-                    true_ratio_corr = self.database[element_corr]["Ratios"].get_ratio(isotope_nom,
-                                                                                      i)  # Looks up true ratio of nominator_isotope/corr_isotope for element_corr (e.g. "116"/"111" for Cd)
-                    signal_corr_isotope = self.lookup_signal(i,
-                                                             isotope_from_line1)  # Looks up signal of corr_isotope - e.g. signal on  "111Cd"
-                    signal_isotope_nom -= (
-                    signal_corr_isotope * true_ratio_corr)  # subtract e.g "111Cd" * true_ratio("116Cd"/"111Cd")
+                    true_ratio_corr = self.database[element_corr]["Ratios"].get_ratio(isotope_nom, i)  # Looks up true ratio of nominator_isotope/corr_isotope for element_corr (e.g. "116"/"111" for Cd)
+                    signal_corr_isotope = self.lookup_signal(i, isotope_from_line1)  # Looks up signal of corr_isotope - e.g. signal on  "111Cd"
+                    signal_isotope_nom -= (signal_corr_isotope * true_ratio_corr)  # subtract e.g "111Cd" * true_ratio("116Cd"/"111Cd")
 
                 raw_ratio = signal_isotope_nom / signal_isotope_denom
                 # beta_temp = log(true_ratio / (signal_isotope_nom/ signal_isotope_denom)) / log(mass_isotope_nom/mass_isotope_denom) # calculate beta
                 beta_temp = self.beta_law(true_ratio, raw_ratio, mass_isotope_nom, mass_isotope_denom)
 
-                # print isotope_nom, beta_temp
 
                 for i in range(iterations):
                     isotope_ratio = self.interference_corr_all(element, isotope_denom, beta_temp)[isotope_nom]
@@ -446,6 +442,7 @@ class normalisation(object):
 
                         convergence = (beta_temp - beta_update) / beta_temp
                         beta_temp = beta_update
+
                     else:
                         print "Iterative Beta Correction Failed! --> beta_temp before iteration used"
                         # beta_temp = log(true_ratio / (signal_isotope_nom/ signal_isotope_denom)) / log(mass_isotope_nom/mass_isotope_denom)
@@ -761,8 +758,8 @@ class evaluation(object):
                                 avg_cup_cycle_bgd_1.append(df_bgd_1[cycle][cup][meas_point])
                                 avg_cup_cycle_bgd_2.append(df_bgd_2[cycle][cup][meas_point])
 
+                        # takes average of bgd1 and bgd2 for a cup with all cycles ignoring outlier ("NaN") and then the average of bgd1 and bgd2
                         bgd_signals[cycle][cup] = np.nanmean([np.nanmean(avg_cup_cycle_bgd_1), np.nanmean(avg_cup_cycle_bgd_2)])
-
         else:
             bgd_signals = {}
             for cycle in df_bgd_1:

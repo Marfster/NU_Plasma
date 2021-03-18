@@ -18,7 +18,7 @@ class NU_data_read(object):
         self.files = datafile_list  # List of datafile numbers
         # self.cycles = no_cycles # isotope measurement lines
         self.cups = cup_configuration  # "dictionary with cup configuration
-        self.zero_cycles = [k for k in cup_configuration.keys() if 'zero' in k]  # cycles for one measurements
+        self.zero_cycles = [k for k in list(cup_configuration.keys()) if 'zero' in k]  # cycles for one measurements
 
     '''***********************************
        Functions used for Reading the data
@@ -67,7 +67,7 @@ class NU_data_read(object):
                 zero_signals[cycle] = {}
                 if (len(self.zero_cycles) == 1):
                     for cup in self.cups[cycle]:
-                        match = [k for k in self.cups[self.zero_cycles[counter]].keys() if
+                        match = [k for k in list(self.cups[self.zero_cycles[counter]].keys()) if
                                  cup[:-4] in k]  # screen throug zero1 dict and match cycle cups
                         if (len(match) > 0):
                             cup_cycle = Counter(data[cycle][cup])
@@ -77,7 +77,7 @@ class NU_data_read(object):
                 else:
                     counter += 1
                     for cup in self.cups[cycle]:
-                        match = [k for k in self.cups[self.zero_cycles[counter]].keys() if
+                        match = [k for k in list(self.cups[self.zero_cycles[counter]].keys()) if
                                  cup[:-4] in k]  # screen throug zero1 dict and match cycle cups
                         if (len(match) > 0):
                             cup_cycle = Counter(data[cycle][cup])
@@ -171,7 +171,7 @@ class normalisation(object):
         self.data_dict = data_dict  # dictionary with data (usually zero and/or bgd corrected)
         self.cycle_no = cycle_no  # number of cycles per measurement
         self.cups = cup_configuration  # cup configuration used for measurement (see "sn_config.py")
-        self.zero_cycles = [k for k in self.cups.keys() if 'zero' in k]  # number of cycles per zero measurement
+        self.zero_cycles = [k for k in list(self.cups.keys()) if 'zero' in k]  # number of cycles per zero measurement
         self.database = database  # refers to database in "sn_config.py", which contains the used Isotope masses and ratios
         self.mass_range = mass_range  # refers to defined mass range of isotopes for calculation (see "sn_config.py")
         self.isotopes_for_corr = isotopes_for_corr  # defines Isotopes used for Interferences correction (see "sn_config.py or ipython notebook")
@@ -192,7 +192,7 @@ class normalisation(object):
         invers_dict = {}
         cup_list = []
         for line in self.data_dict:
-            invers_dict[line] = dict(zip(self.cups[line].values(), self.cups[line]))
+            invers_dict[line] = dict(list(zip(list(self.cups[line].values()), self.cups[line])))
             if (isotope in invers_dict[line]):
                 cup_list.append((line, invers_dict[line][isotope]))
         if isotope_from_line1 == False and len(cup_list) > 1:
@@ -272,7 +272,7 @@ class normalisation(object):
             return self.mass_frac_GPL(element_nom, element_denom, isotope, isotope_denom, beta, isotope_from_line1,
                                       corr_isotope_denom)
         else:
-            print 'wrong input for mass-fractionation law, use "exp" or "GPL"'
+            print('wrong input for mass-fractionation law, use "exp" or "GPL"')
 
     def mass_frac_law_inv(self, isotope_ratio, mass_isotope_nom, mass_isotope_denom, beta):
         if self.law_mass_frac == "exp":
@@ -280,7 +280,7 @@ class normalisation(object):
         elif self.law_mass_frac == "GPL":
             return isotope_ratio * beta ** -(mass_isotope_nom ** self.n_GPL - mass_isotope_denom ** self.n_GPL)
         else:
-            print 'wrong input for mass-fractionation law, use "exp" or "GPL"'
+            print('wrong input for mass-fractionation law, use "exp" or "GPL"')
 
     def beta_law(self, true_ratio, ratio_raw, mass_isotope_nom, mass_isotope_denom):
         if self.law_mass_frac == "exp":
@@ -444,7 +444,7 @@ class normalisation(object):
                         beta_temp = beta_update
 
                     else:
-                        print "Iterative Beta Correction Failed! --> beta_temp before iteration used"
+                        print("Iterative Beta Correction Failed! --> beta_temp before iteration used")
                         # beta_temp = log(true_ratio / (signal_isotope_nom/ signal_isotope_denom)) / log(mass_isotope_nom/mass_isotope_denom)
                         beta_temp = self.beta_law(true_ratio, raw_ratio, mass_isotope_nom, mass_isotope_denom)
                         break
@@ -561,7 +561,7 @@ class normalisation(object):
                         beta_temp = beta_update  # update new beta value for start of new loop
                     else:
                         # jump out of loop if a beta value creates negative isotope values and use beta of previous iteration step
-                        print "Iterative Beta Correction Failed! --> beta_temp before iteration used"
+                        print("Iterative Beta Correction Failed! --> beta_temp before iteration used")
                         # beta_temp = log(true_ratio / (signal_isotope_nom/ signal_isotope_denom)) / log(mass_isotope_nom/mass_isotope_denom)
                         beta_temp = self.beta_law(true_ratio, raw_ratio, mass_isotope_nom, mass_isotope_denom)
                         break
@@ -694,9 +694,9 @@ class evaluation(object):
         invers_dict = {}
         if "cycle2" in df:
             for cycle in df:
-                invers_dict[cycle] = dict(zip(self.cups[cycle].values(), self.cups[cycle]))
+                invers_dict[cycle] = dict(list(zip(list(self.cups[cycle].values()), self.cups[cycle])))
                 if cycle == "cycle2":
-                    keys = df[cycle].keys()
+                    keys = list(df[cycle].keys())
                     keys.append(keys.pop(keys.index(invers_dict["cycle2"][isotope])))
                     for cup in keys:
                         for meas_point in df[cycle][cup]:
@@ -734,8 +734,8 @@ class evaluation(object):
                     names = ['id', 'data']
                     formats = ['float', 'float']
                     dtype = dict(names=names, formats=formats)
-                    cup_cycle = np.array(self.data_dict[cycle][cup].items(), dtype=dtype)
-                    cup_cycle_bgd = np.array(bgd_signals[cycle][cup].items(), dtype=dtype)
+                    cup_cycle = np.array(list(self.data_dict[cycle][cup].items()), dtype=dtype)
+                    cup_cycle_bgd = np.array(list(bgd_signals[cycle][cup].items()), dtype=dtype)
                     mean = np.nanmean(cup_cycle_bgd["data"])
                     x2 = np.full(len(self.data_dict[cycle][cup]), (mean))
                     cup_cycle = np.array(cup_cycle)
@@ -779,7 +779,7 @@ class evaluation(object):
                     names = ['id', 'data']
                     formats = ['float', 'float']
                     dtype = dict(names=names, formats=formats)
-                    cup_cycle = np.array(self.data_dict[cycle][cup].items(), dtype=dtype)
+                    cup_cycle = np.array(list(self.data_dict[cycle][cup].items()), dtype=dtype)
                     avg_bgd = bgd_signals[cycle][cup]
                     x2 = np.full(len(self.data_dict[cycle][cup]), (avg_bgd))
                     #cup_cycle = np.array(cup_cycle)
@@ -1058,7 +1058,7 @@ class evaluation(object):
 
         for sample in files:
             df = NU_data_read(path, sample, cup_config)
-            cycles = range(1, len(df.data_read(sample).index) + 1)
+            cycles = list(range(1, len(df.data_read(sample).index) + 1))
 
             if bgd_corr == True:
                 df_zero = df.data_zero_corr(sample)

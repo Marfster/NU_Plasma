@@ -1,4 +1,7 @@
-__author__ = 'matthias'
+__author__ = 'Matthias Friebel'
+
+"""Defines classes for Isotope Masses, Isotope Ratios and Isotope Abundances of an element necessary
+for data processing. """
 
 class Isotope_Masses():
 

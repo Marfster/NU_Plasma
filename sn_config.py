@@ -1,4 +1,8 @@
-__author__ = 'matthias'
+__author__ = 'Matthias Friebel'
+
+"""Configuration file for Evaluation of ICP-MS measurements for Sn isotopes.
+   Contains isotope masses, isotope ratios for Sn and it's interfering elements, 
+   as well as the dictionaries with the different possible collector cups used of the mass-spectrometers NU Plasma II and Neptune Plus"""
 
 from iso_properties import Isotope_Masses, Isotope_Ratios, Isotopes_Mass_Range
 
